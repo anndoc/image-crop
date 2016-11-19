@@ -1,11 +1,11 @@
 /**
- * Created by anna on 25.08.16.
+ * Created by anndoc on 25.08.16.
  *
  * @fileOverview The Image Crop plugin.
  */
 
 CKEDITOR.plugins.add('imagecrop', {
-    requires: 'dialog',
+    requires: 'dialog,image',
     icons: 'imagecrop',
     lang: 'en',
     init: function (editor) {
@@ -20,10 +20,11 @@ CKEDITOR.plugins.add('imagecrop', {
         document.getElementsByTagName("head")[0].appendChild(style);
 
         CKEDITOR.scriptLoader.load(editor.config.cropperJsUrl);
-        editor.ui.addButton('Crop', {
+        editor.ui.addButton('ImageCrop', {
             label: editor.lang.imagecrop.title,
             command: 'imagecrop',
-            toolbar: 'insert'
+            toolbar: 'insert',
+            icon: this.path + 'icons/imagecrop.png'
         });
 
         if (editor.contextMenu) {

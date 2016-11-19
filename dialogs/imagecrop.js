@@ -8,7 +8,7 @@ CKEDITOR.dialog.add('cropDialog', function (editor) {
             var URL = window.URL || window.webkitURL,
                 blobURL,
                 file = e.target.files[0],
-                canvas = CKEDITOR.document.getById('img').$;
+                canvas = CKEDITOR.document.getElementsByTag('img').$[0];
 
             if (!cropper)
                 cropper = new Cropper(canvas, options);
@@ -64,7 +64,7 @@ CKEDITOR.dialog.add('cropDialog', function (editor) {
                         children: [
                             {
                                 type: 'html',
-                                html: '<img id="img">',
+                                html: '<img>',
                                 id: 'img',
                                 label: editor.lang.common.image,
                                 style: 'width: 100%; height: ' + parseInt(window.innerHeight * 80 / 100) + 'px; border-color:#CECECE',
@@ -106,7 +106,7 @@ CKEDITOR.dialog.add('cropDialog', function (editor) {
                                                 if (xhr.readyState == 4 && xhr.status == 200) {
                                                     form.ownerDocument.write(response.target.responseText);
                                                     cropper.destroy();
-                                                    CKEDITOR.document.getById('img').$.removeAttribute('src');
+                                                    CKEDITOR.document.getElementsByTag('img').$[0].removeAttribute('src');
                                                 }
                                             };
 
