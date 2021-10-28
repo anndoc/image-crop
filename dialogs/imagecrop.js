@@ -1,17 +1,26 @@
 CKEDITOR.dialog.add('cropDialog', function (editor) {
     var cropper,
+        canvasId,
+        canvas,
         imageType = 'image/jpeg',
         width = parseInt(window.innerWidth * 80 / 100),
         height = parseInt(window.innerHeight * 80 / 100),
         options = editor.config.cropperOption,
-        uploadOnChange = function (e) {
-            var URL = window.URL || window.webkitURL,
-                blobURL,
-                file = e.target.files[0],
-                canvas = CKEDITOR.document.getElementsByTag('img').$[0];
+        initCropper = function (e) {
+            if (!canvas)
+                // grab generated random DOM ID
+                canvasId = CKEDITOR.dialog.getCurrent().getContentElement('cropTab', 'image').domId;
+                canvas = window.document.getElementById(canvasId);
 
             if (!cropper)
                 cropper = new Cropper(canvas, options);
+        },
+        uploadOnChange = function (e) {
+            var url = window.URL || window.webkitURL,
+                blobURL,
+                file = e.target.files[0];
+
+            initCropper(e);
 
             if (/^image\/\w+/.test(file.type)) {
                 blobURL = URL.createObjectURL(file);
@@ -54,7 +63,7 @@ CKEDITOR.dialog.add('cropDialog', function (editor) {
         height: height,
         contents: [
             {
-                id: 'base',
+                id: 'cropTab',
                 label: editor.lang.imagecrop.cropTab,
                 filebrowser: 'uploadButton',
                 elements: [
@@ -65,9 +74,9 @@ CKEDITOR.dialog.add('cropDialog', function (editor) {
                             {
                                 type: 'html',
                                 html: '<img>',
-                                id: 'img',
+                                id: 'image',
                                 label: editor.lang.common.image,
-                                style: 'width: 100%; height: ' + parseInt(window.innerHeight * 80 / 100) + 'px; border-color:#CECECE',
+                                style: 'max-width: 100%; height: ' + parseInt(window.innerHeight * 80 / 100) + 'px; border-color:#CECECE',
                                 setup: function(element) {
                                     cropper.reset().replace(element.getAttribute('src'));
                                 }
@@ -89,14 +98,14 @@ CKEDITOR.dialog.add('cropDialog', function (editor) {
                                         style: 'display: none',
                                         id: 'uploadButton',
                                         label: editor.lang.imagecrop.btnUpload,
-                                        for: ['base', 'upload'],
+                                        for: ['cropTab', 'upload'],
                                         filebrowser: {
                                             action: 'QuickUpload'
                                         },
                                         onClick: function () {
                                             var dialog = this.getDialog(),
-                                                form = dialog.getContentElement('base', 'upload').getInputElement().$.form,
-                                                fileName = dialog.getContentElement('base', 'upload').getInputElement().$.value.replace(/^.*[\\\/]/, '') || 'upload.jpg',
+                                                form = dialog.getContentElement('cropTab', 'upload').getInputElement().$.form,
+                                                fileName = dialog.getContentElement('cropTab', 'upload').getInputElement().$.value.replace(/^.*[\\\/]/, '') || 'upload.jpg',
                                                 formData,
                                                 xhr = new XMLHttpRequest();
 
@@ -106,7 +115,7 @@ CKEDITOR.dialog.add('cropDialog', function (editor) {
                                                 if (xhr.readyState == 4 && xhr.status == 200) {
                                                     form.ownerDocument.write(response.target.responseText);
                                                     cropper.destroy();
-                                                    CKEDITOR.document.getElementsByTag('img').$[0].removeAttribute('src');
+                                                    canvas.removeAttribute('src');
                                                 }
                                             };
 
@@ -128,6 +137,10 @@ CKEDITOR.dialog.add('cropDialog', function (editor) {
                 ]
             }
         ],
+        onLoad: function (e) {
+            initCropper(e);
+            window.console.log('onLoad ', e);
+        },
         onShow: function () {
             var selection = editor.getSelection();
             var element = selection.getStartElement();
@@ -148,7 +161,7 @@ CKEDITOR.dialog.add('cropDialog', function (editor) {
         },
         onOk: function () {
             var dialog = this,
-                uploadButton = dialog.getContentElement('base', 'uploadButton');
+                uploadButton = dialog.getContentElement('cropTab', 'uploadButton');
             uploadButton.click();
         }
     }
